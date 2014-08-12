@@ -68,11 +68,12 @@ public class BarList extends BaseAdapter {
         View row = inflater.inflate(R.layout.bar_info_row, parent, false);
 
         TextView barName = (TextView) row.findViewById(R.id.barNameTxt);
-        //TextView barAddress;
+        TextView barAddress = (TextView) row.findViewById(R.id.barAddrTxt);
         TextView barRating = (TextView) row.findViewById(R.id.barRatingTxt);
 
         SingleRow temp = list.get(position);
         barName.setText(temp.title);
+        barAddress.setText(temp.address);
         barRating.setText(temp.rating);
 
         return row;

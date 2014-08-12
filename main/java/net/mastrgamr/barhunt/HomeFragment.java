@@ -20,11 +20,14 @@ import net.mastrgamr.api.Keys;
 import net.mastrgamr.api.YelpAPI;
 
 import com.beust.jcommander.JCommander;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 import static net.mastrgamr.api.YelpAPI.YelpAPICLI;
 
-public class HomeFragment extends Fragment implements View.OnClickListener, Keys{
+public class HomeFragment extends Fragment implements Keys{
 
     /**
      * The fragment argument representing the section number for this
@@ -32,15 +35,12 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Keys
      */
     private static final String ARG_SECTION_NUMBER = "section_number";
 
-    private Button getBarInfoBtn;
-
     ListView barListView;
     String[] barNames;
     String[] barAddresses;
     String[] barRatings;
 
     View rootView;
-
 
     /**
      * Returns a new instance of this fragment for the given section
@@ -61,11 +61,10 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Keys
                              Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-        getBarInfoBtn = (Button) rootView.findViewById(R.id.barInfoBtn);
-        getBarInfoBtn.setOnClickListener(this);
-
         barListView = (ListView) rootView.findViewById(R.id.listView);
-        //barListView.setAdapter(new BarList(rootView.getContext(), barNames, barAddresses, barRatings));
+
+        SearchBars lookup = new SearchBars();
+        lookup.execute();
 
         return rootView;
     }
@@ -77,16 +76,10 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Keys
                 getArguments().getInt(ARG_SECTION_NUMBER));
     }
 
-    @Override
-    public void onClick(View v) {
-        SearchBars lookup = new SearchBars();
-        lookup.execute();
-    }
-
     YelpAPICLI yelpApiCli;
     YelpAPI yelpApi;
 
-    private class SearchBars extends AsyncTask<Void, String, Void> {
+    private class SearchBars extends AsyncTask<Void, String[], Void> {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
@@ -117,11 +110,16 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Keys
                     Log.d("HomeFragment", tempJSON);
 
                     barNames[i] = barInfo.get("name").toString();
-                    barAddresses[i] = barInfo.get("location").toString();
+
+                    String tempLoc = barInfo.get("location").toString();
+                    JSONObject tempLocObj = (JSONObject) parser.parse(tempLoc);
+                    JSONArray tempArray = (JSONArray) tempLocObj.get("display_address");
+                    barAddresses[i] = (String) tempArray.get(0) + " | " + (String) tempArray.get(1);
+
+                    Log.d("HomeFragment", barAddresses[i]);
                     barRatings[i] = barInfo.get("rating").toString();
-                    //TODO: Find better way to publish progress? Calls 10 times!!!
-                    publishProgress(barNames[i], barAddresses[i], barRatings[i]);
                 }
+                publishProgress(barNames, barAddresses, barRatings);
 
             } catch (org.json.simple.parser.ParseException pe) {
                 Log.e("HomeFragment", pe.getMessage());
@@ -131,7 +129,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Keys
 
         //Moved setAdapter to onPostExecute so it won't be called 10 times. Can't be efficient.
         @Override
-        protected void onProgressUpdate(String... values) {
+        protected void onProgressUpdate(String[]... values) {
            // barListView.setAdapter(new BarList(rootView.getContext(), barNames, barAddresses, barRatings));
         }
 

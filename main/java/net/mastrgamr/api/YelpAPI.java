@@ -30,7 +30,7 @@ public class YelpAPI implements Keys {
 
   private static final String API_HOST = "api.yelp.com";
   private static final String DEFAULT_TERM = "bars";
-  private static final String DEFAULT_LOCATION = "New York, NY";
+  private static final String DEFAULT_LOCATION = "10003";
   private static final int SEARCH_LIMIT = 10;
   private static final String SEARCH_PATH = "/v2/search";
   private static final String BUSINESS_PATH = "/v2/business";
@@ -138,15 +138,14 @@ public class YelpAPI implements Keys {
     for (int i = 0; i < SEARCH_LIMIT; i++) {
 	    business[i] = (JSONObject) businesses.get(i);
 	    businessID[i] = business[i].get("id").toString();
-	    System.out.println(String.format(
-	        "%s businesses found, querying business info for the top result \"%s\" ...",
-	        businesses.size(), businessID[i]));
+	    //System.out.println(String.format(
+	    //    "%s businesses found, querying business info for the top result \"%s\" ...",
+	    //    businesses.size(), businessID[i]));
 	
 	    // Select the business and display business details
 	    businessResponseJSON[i] = yelpApi.searchByBusinessId(businessID[i]);
-	    System.out.println(String.format("Result for business \"%s\" found:", businessID[i]));
+	    //System.out.println(String.format("Result for business \"%s\" found:", businessID[i]));
         Log.d("YelpAPI" ,businessResponseJSON[i]);
-	    System.out.println(businessResponseJSON.length);
     }
   }
 

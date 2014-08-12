@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/bar_info_row"
+    android:contentDescription="@string/bar_info_image">
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/barDescImg"
+        android:src="@android:drawable/ic_menu_report_image"
+        android:paddingTop="10dp"
+        android:paddingBottom="3dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:padding="10dp"
+        android:contentDescription="@string/bar_info_image" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="@string/loading"
+        android:id="@+id/barNameTxt"
+        android:paddingBottom="3dp"
+        android:layout_toEndOf="@+id/barDescImg"
+        android:layout_alignTop="@+id/barDescImg"
+        android:gravity="center_horizontal" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/loading"
+        android:id="@+id/barAddrTxt"
+        android:layout_alignBottom="@+id/barDescImg"
+        android:layout_toRightOf="@+id/barDescImg"
+        android:layout_toEndOf="@+id/barDescImg" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="0.0"
+        android:id="@+id/barRatingTxt"
+        android:layout_alignParentTop="false"
+        android:layout_alignParentRight="false"
+        android:layout_alignParentEnd="true"
+        android:layout_alignTop="@+id/barDescImg"
+        android:layout_alignBottom="@+id/barDescImg"
+        android:gravity="center"
+        android:padding="5dp"
+        android:background="#ffdddddd" />
+</RelativeLayout>

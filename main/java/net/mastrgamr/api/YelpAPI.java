@@ -31,14 +31,14 @@ public class YelpAPI implements Keys {
   private static final String API_HOST = "api.yelp.com";
   private static final String DEFAULT_TERM = "bars";
   private static final String DEFAULT_LOCATION = "New York, NY";
-  private static final int SEARCH_LIMIT = 3;
+  private static final int SEARCH_LIMIT = 10;
   private static final String SEARCH_PATH = "/v2/search";
   private static final String BUSINESS_PATH = "/v2/business";
 
   OAuthService service;
   Token accessToken;
 
-  String businessResponseJSON;
+  String[] businessResponseJSON;
 
   /**
    * Setup the Yelp API OAuth credentials.
@@ -105,7 +105,6 @@ public class YelpAPI implements Keys {
    * @return <tt>String</tt> body of API response
    */
   private String sendRequestAndGetResponse(OAuthRequest request) {
-    System.out.println("Querying " + request.getCompleteUrl() + " ...");
     this.service.signRequest(this.accessToken, request);
     Response response = request.send();
     return response.getBody();
@@ -127,14 +126,14 @@ public class YelpAPI implements Keys {
     try {
       response = (JSONObject) parser.parse(searchResponseJSON);
     } catch (ParseException pe) {
-      System.out.println("Error: could not parse JSON response:");
-      System.out.println(searchResponseJSON);
+      Log.e("YelpAPI", "Error: could not parse JSON response:" + searchResponseJSON);
       System.exit(1);
     }
 
     JSONArray businesses = (JSONArray) response.get("businesses");
     String businessID[] = new String[SEARCH_LIMIT];
     JSONObject business[] = new JSONObject[SEARCH_LIMIT];
+    businessResponseJSON = new String[SEARCH_LIMIT];
     
     for (int i = 0; i < SEARCH_LIMIT; i++) {
 	    business[i] = (JSONObject) businesses.get(i);
@@ -144,10 +143,10 @@ public class YelpAPI implements Keys {
 	        businesses.size(), businessID[i]));
 	
 	    // Select the business and display business details
-	    businessResponseJSON = yelpApi.searchByBusinessId(businessID[i]);
+	    businessResponseJSON[i] = yelpApi.searchByBusinessId(businessID[i]);
 	    System.out.println(String.format("Result for business \"%s\" found:", businessID[i]));
-        Log.d("YelpAPI" ,businessResponseJSON);
-	    System.out.println();
+        Log.d("YelpAPI" ,businessResponseJSON[i]);
+	    System.out.println(businessResponseJSON.length);
     }
   }
 
@@ -162,8 +161,8 @@ public class YelpAPI implements Keys {
     public String location = DEFAULT_LOCATION;
   }
 
-  public String getBusinessResponseJSON() {
-      return businessResponseJSON;
+  public String getBusinessResponseJSON(int i) {
+      return businessResponseJSON[i];
   }
 
 }

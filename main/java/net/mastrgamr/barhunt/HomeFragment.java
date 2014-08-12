@@ -13,7 +13,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.TextView;
+import android.widget.ListView;
+import android.widget.Toast;
 
 import net.mastrgamr.api.Keys;
 import net.mastrgamr.api.YelpAPI;
@@ -31,10 +32,14 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Keys
      */
     private static final String ARG_SECTION_NUMBER = "section_number";
 
-    private TextView barInfoTxt;
     private Button getBarInfoBtn;
 
-    String barName;
+    ListView barListView;
+    String[] barNames;
+    String[] barAddresses;
+    String[] barRatings;
+
+    View rootView;
 
 
     /**
@@ -54,12 +59,13 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Keys
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+        rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-        barInfoTxt = (TextView) rootView.findViewById(R.id.barInfoTxt);
         getBarInfoBtn = (Button) rootView.findViewById(R.id.barInfoBtn);
-
         getBarInfoBtn.setOnClickListener(this);
+
+        barListView = (ListView) rootView.findViewById(R.id.listView);
+        //barListView.setAdapter(new BarList(rootView.getContext(), barNames, barAddresses, barRatings));
 
         return rootView;
     }
@@ -94,14 +100,28 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Keys
         @Override
         protected Void doInBackground(Void... params) {
             yelpApi.queryAPI(yelpApi, yelpApiCli);
+
+            //Create a temp string to hold the JSON found in API return.
+            String tempJSON;
+            barNames = new String[10];
+            barAddresses = new String[10];
+            barRatings = new String[10];
+
             try {
-                JSONParser parser = new JSONParser();
-                org.json.simple.JSONObject barTitle;
-                barName = yelpApi.getBusinessResponseJSON();
-                barTitle = (org.json.simple.JSONObject) parser.parse(barName);
-                Log.d("HomeFragment", barName);
-                barName = barTitle.get("name").toString();
-                publishProgress(barName);
+                for (int i = 0; i < 10; i++) {
+                    JSONParser parser = new JSONParser();
+                    org.json.simple.JSONObject barInfo;
+
+                    tempJSON = yelpApi.getBusinessResponseJSON(i); //Use temp JSON to parse relevant bar info.
+                    barInfo = (org.json.simple.JSONObject) parser.parse(tempJSON);
+                    Log.d("HomeFragment", tempJSON);
+
+                    barNames[i] = barInfo.get("name").toString();
+                    barAddresses[i] = barInfo.get("location").toString();
+                    barRatings[i] = barInfo.get("rating").toString();
+                    //TODO: Find better way to publish progress? Calls 10 times!!!
+                    publishProgress(barNames[i], barAddresses[i], barRatings[i]);
+                }
 
             } catch (org.json.simple.parser.ParseException pe) {
                 Log.e("HomeFragment", pe.getMessage());
@@ -109,9 +129,16 @@ public class HomeFragment extends Fragment implements View.OnClickListener, Keys
             return null;
         }
 
+        //Moved setAdapter to onPostExecute so it won't be called 10 times. Can't be efficient.
         @Override
         protected void onProgressUpdate(String... values) {
-            barInfoTxt.setText(values[0]);
+           // barListView.setAdapter(new BarList(rootView.getContext(), barNames, barAddresses, barRatings));
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            barListView.setAdapter(new BarList(rootView.getContext(), barNames, barAddresses, barRatings));
+            Toast.makeText(rootView.getContext(), "10 Bars found in the area.", Toast.LENGTH_SHORT).show();
         }
     }
 }

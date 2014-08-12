@@ -10,4 +10,7 @@
     <string name="action_example">Example action</string>
     <string name="action_settings">Refresh</string>
 
+    <string name="bar_info_image">Displays image submitted through Yelp.</string>
+    <string name="loading">Loading ...</string>
+
 </resources>

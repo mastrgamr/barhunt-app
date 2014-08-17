@@ -5,6 +5,11 @@ package net.mastrgamr.barhunt;
  */
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -12,7 +17,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -63,8 +67,27 @@ public class HomeFragment extends Fragment implements Keys{
 
         barListView = (ListView) rootView.findViewById(R.id.listView);
 
-        SearchBars lookup = new SearchBars();
-        lookup.execute();
+        //The following checks whether or not the phone is connected to an internet source.
+        //If not, don't run the AsyncTask to prevent app crash.
+        ConnectivityManager cm = (ConnectivityManager) rootView.getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo ni = cm.getActiveNetworkInfo();
+
+        if(ni != null && ni.isConnected()){
+            SearchBars lookup = new SearchBars();
+            lookup.execute();
+        } else {
+            AlertDialog.Builder dialog = new AlertDialog.Builder(rootView.getContext());
+            dialog.setMessage("Your phone is not connected to a an internet source!\n" +
+                    "Please connect and refresh.")
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            //Don't do shit.
+                            //TODO: Later implement this as a refresh button?
+                        }
+                    });
+            dialog.show();
+        }
 
         return rootView;
     }

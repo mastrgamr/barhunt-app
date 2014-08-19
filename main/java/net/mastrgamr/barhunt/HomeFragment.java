@@ -17,32 +17,34 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import net.mastrgamr.api.Keys;
 import net.mastrgamr.api.YelpAPI;
 
-import com.beust.jcommander.JCommander;
-
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
-import static net.mastrgamr.api.YelpAPI.YelpAPICLI;
 
-public class HomeFragment extends Fragment implements Keys{
+public class HomeFragment extends Fragment implements Keys, View.OnClickListener{
 
     /**
      * The fragment argument representing the section number for this
      * fragment.
      */
-    private static final String ARG_SECTION_NUMBER = "section_number";
+    private static final String ARG_SECTION_NUMBER = HomeFragment.class.getSimpleName();
 
+    EditText zipCodeTxt;
+    Button goBtn;
     ListView barListView;
     String[] barNames;
     String[] barAddresses;
     String[] barRatings;
+    SearchBars locate;
 
     View rootView;
 
@@ -65,7 +67,12 @@ public class HomeFragment extends Fragment implements Keys{
                              Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
+        zipCodeTxt = (EditText) rootView.findViewById(R.id.zipcodeTxt);
+        goBtn = (Button) rootView.findViewById(R.id.goBtn);
+        goBtn.setOnClickListener(this);
         barListView = (ListView) rootView.findViewById(R.id.listView);
+
+        locate = new SearchBars();
 
         //The following checks whether or not the phone is connected to an internet source.
         //If not, don't run the AsyncTask to prevent app crash.
@@ -83,7 +90,7 @@ public class HomeFragment extends Fragment implements Keys{
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
                             //Don't do shit.
-                            //TODO: Later implement this as a refresh button?
+                            //TODO: Later implement this as a refresh action?
                         }
                     });
             dialog.show();
@@ -99,23 +106,34 @@ public class HomeFragment extends Fragment implements Keys{
                 getArguments().getInt(ARG_SECTION_NUMBER));
     }
 
-    YelpAPICLI yelpApiCli;
     YelpAPI yelpApi;
 
-    private class SearchBars extends AsyncTask<Void, String[], Void> {
+    //TODO: Create efficient way to check if thread is being run
+    //if task is running create the new instance. Since an instance can only be run once >_>
+    @Override
+    public void onClick(View v) {
+        //if AsyncTask is running, do nothing.
+        if(!(locate.getStatus() == AsyncTask.Status.RUNNING))
+            locate.execute(zipCodeTxt.getText().toString());
+    }
+
+    private class SearchBars extends AsyncTask<String, String[], Void> {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-
-            yelpApiCli = new YelpAPICLI();
-            new JCommander(yelpApiCli);
 
             yelpApi = new YelpAPI(CONSUMER_KEY, CONSUMER_SECRET, TOKEN, TOKEN_SECRET);
         }
 
         @Override
-        protected Void doInBackground(Void... params) {
-            yelpApi.queryAPI(yelpApi, yelpApiCli);
+        protected Void doInBackground(String... location) {
+
+            if (location.length == 0) {
+                yelpApi.queryAPI(yelpApi, YelpAPI.DEFAULT_LOCATION);
+            }
+            if (location.length != 0) {
+                yelpApi.queryAPI(yelpApi, location[0]);
+            }
 
             //Create a temp string to hold the JSON found in API return.
             String tempJSON;
@@ -137,7 +155,7 @@ public class HomeFragment extends Fragment implements Keys{
                     String tempLoc = barInfo.get("location").toString();
                     JSONObject tempLocObj = (JSONObject) parser.parse(tempLoc);
                     JSONArray tempArray = (JSONArray) tempLocObj.get("display_address");
-                    barAddresses[i] = (String) tempArray.get(0) + " | " + (String) tempArray.get(1);
+                    barAddresses[i] = tempArray.get(0) + " | " + tempArray.get(1);
 
                     Log.d("HomeFragment", barAddresses[i]);
                     barRatings[i] = barInfo.get("rating").toString();
@@ -161,5 +179,12 @@ public class HomeFragment extends Fragment implements Keys{
             barListView.setAdapter(new BarList(rootView.getContext(), barNames, barAddresses, barRatings));
             Toast.makeText(rootView.getContext(), "10 Bars found in the area.", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    //Not fully working yet.
+    public void refresh() {
+        //if AsyncTask is running, do nothing.
+        if(locate.getStatus() == AsyncTask.Status.FINISHED)
+            locate.execute();
     }
 }

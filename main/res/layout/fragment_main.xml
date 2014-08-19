@@ -17,11 +17,38 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/listView"
+        android:dividerHeight="5dp"
+        android:drawSelectorOnTop="false"
+        android:divider="#00ffffff"
+        android:layout_below="@+id/zipcodeTxt"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:dividerHeight="10dp"
-        android:drawSelectorOnTop="false"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        android:ems="10"
+        android:id="@+id/zipcodeTxt"
         android:layout_alignParentTop="true"
-        android:divider="#00ffffff" />
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_toLeftOf="@+id/goBtn"
+        android:layout_toStartOf="@+id/goBtn"
+        android:maxLength="5"
+        android:hint="Zip Code" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Go"
+        android:id="@+id/goBtn"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignBottom="@+id/zipcodeTxt" />
 
 </RelativeLayout>

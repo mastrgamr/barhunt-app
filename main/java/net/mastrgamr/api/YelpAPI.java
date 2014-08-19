@@ -30,7 +30,7 @@ public class YelpAPI implements Keys {
 
   private static final String API_HOST = "api.yelp.com";
   private static final String DEFAULT_TERM = "bars";
-  private static final String DEFAULT_LOCATION = "10003";
+  public static final String DEFAULT_LOCATION = "10003"; //TODO: public for now, later get GPS coords for default
   private static final int SEARCH_LIMIT = 10;
   private static final String SEARCH_PATH = "/v2/search";
   private static final String BUSINESS_PATH = "/v2/business";
@@ -41,7 +41,7 @@ public class YelpAPI implements Keys {
   String[] businessResponseJSON;
 
   /**
-   * Setup the Yelp API OAuth credentials.
+   * Setup the Yelp API OAuth credentials. Stored in Keys interface. (shhh, it's private GitHub!)
    * 
    * @param consumerKey Consumer key
    * @param consumerSecret Consumer secret
@@ -60,14 +60,13 @@ public class YelpAPI implements Keys {
    * <p>
    * See <a href="http://www.yelp.com/developers/documentation/v2/search_api">Yelp Search API V2</a>
    * for more info.
-   * 
-   * @param term <tt>String</tt> of the search term to be queried
+   *
    * @param location <tt>String</tt> of the location
    * @return <tt>String</tt> JSON Response
    */
-  public String searchForBusinessesByLocation(String term, String location) {
+  public String searchForBusinessesByLocation(String location) {
     OAuthRequest request = createOAuthRequest(SEARCH_PATH);
-    request.addQuerystringParameter("term", term);
+    request.addQuerystringParameter("term", DEFAULT_TERM);
     request.addQuerystringParameter("location", location);
     request.addQuerystringParameter("limit", String.valueOf(SEARCH_LIMIT));
     return sendRequestAndGetResponse(request);
@@ -94,8 +93,7 @@ public class YelpAPI implements Keys {
    * @return <tt>OAuthRequest</tt>
    */
   private OAuthRequest createOAuthRequest(String path) {
-    OAuthRequest request = new OAuthRequest(Verb.GET, "http://" + API_HOST + path);
-    return request;
+    return new OAuthRequest(Verb.GET, "http://" + API_HOST + path);
   }
 
   /**
@@ -115,49 +113,37 @@ public class YelpAPI implements Keys {
    * the Business API.
    * 
    * @param yelpApi <tt>YelpAPI</tt> service instance
-   * @param yelpApiCli <tt>YelpAPICLI</tt> command line arguments
    */
-  public void queryAPI(YelpAPI yelpApi, YelpAPICLI yelpApiCli) {
-    String searchResponseJSON =
-        yelpApi.searchForBusinessesByLocation(yelpApiCli.term, yelpApiCli.location);
+  public void queryAPI(YelpAPI yelpApi, String location) {
+      String searchResponseJSON = yelpApi.searchForBusinessesByLocation(location);
+      Log.d("YelpAPI", searchResponseJSON); //remove this
 
-    JSONParser parser = new JSONParser();
-    JSONObject response = null;
-    try {
-      response = (JSONObject) parser.parse(searchResponseJSON);
-    } catch (ParseException pe) {
-      Log.e("YelpAPI", "Error: could not parse JSON response:" + searchResponseJSON);
-      System.exit(1);
-    }
+      JSONParser parser = new JSONParser();
+      JSONObject response = null;
+      try {
+        response = (JSONObject) parser.parse(searchResponseJSON);
+      } catch (ParseException pe) {
+        Log.e("YelpAPI", "Error: could not parse JSON response:" + searchResponseJSON);
+        System.exit(1);
+      }
 
-    JSONArray businesses = (JSONArray) response.get("businesses");
-    String businessID[] = new String[SEARCH_LIMIT];
-    JSONObject business[] = new JSONObject[SEARCH_LIMIT];
-    businessResponseJSON = new String[SEARCH_LIMIT];
-    
-    for (int i = 0; i < SEARCH_LIMIT; i++) {
-	    business[i] = (JSONObject) businesses.get(i);
-	    businessID[i] = business[i].get("id").toString();
-	    //System.out.println(String.format(
-	    //    "%s businesses found, querying business info for the top result \"%s\" ...",
-	    //    businesses.size(), businessID[i]));
-	
-	    // Select the business and display business details
-	    businessResponseJSON[i] = yelpApi.searchByBusinessId(businessID[i]);
-	    //System.out.println(String.format("Result for business \"%s\" found:", businessID[i]));
-        Log.d("YelpAPI" ,businessResponseJSON[i]);
-    }
-  }
+      JSONArray businesses = (JSONArray) response.get("businesses");
+      String businessID[] = new String[SEARCH_LIMIT];
+      JSONObject business[] = new JSONObject[SEARCH_LIMIT];
+      businessResponseJSON = new String[SEARCH_LIMIT];
 
-  /**
-   * Command-line interface for the sample Yelp API runner.
-   */
-  public static class YelpAPICLI {
-    @Parameter(names = {"-q", "--term"}, description = "Search Query Term")
-    public String term = DEFAULT_TERM;
+      for (int i = 0; i < SEARCH_LIMIT; i++) {
+	      business[i] = (JSONObject) businesses.get(i);
+	      businessID[i] = business[i].get("id").toString();
+	      //System.out.println(String.format(
+	      //    "%s businesses found, querying business info for the top result \"%s\" ...",
+	      //    businesses.size(), businessID[i]));
 
-    @Parameter(names = {"-l", "--location"}, description = "Location to be Queried")
-    public String location = DEFAULT_LOCATION;
+   	      // Select the business and display business details
+	      businessResponseJSON[i] = yelpApi.searchByBusinessId(businessID[i]);
+	      //System.out.println(String.format("Result for business \"%s\" found:", businessID[i]));
+          Log.d("YelpAPI" ,businessResponseJSON[i]);
+      }
   }
 
   public String getBusinessResponseJSON(int i) {

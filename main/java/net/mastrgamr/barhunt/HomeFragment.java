@@ -44,7 +44,7 @@ public class HomeFragment extends Fragment implements Keys, View.OnClickListener
     String[] barNames;
     String[] barAddresses;
     String[] barRatings;
-    SearchBars locate;
+    SearchBars lookup;
 
     View rootView;
 
@@ -72,15 +72,13 @@ public class HomeFragment extends Fragment implements Keys, View.OnClickListener
         goBtn.setOnClickListener(this);
         barListView = (ListView) rootView.findViewById(R.id.listView);
 
-        locate = new SearchBars();
-
         //The following checks whether or not the phone is connected to an internet source.
         //If not, don't run the AsyncTask to prevent app crash.
         ConnectivityManager cm = (ConnectivityManager) rootView.getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo ni = cm.getActiveNetworkInfo();
 
         if(ni != null && ni.isConnected()){
-            SearchBars lookup = new SearchBars();
+            lookup = new SearchBars();
             lookup.execute();
         } else {
             AlertDialog.Builder dialog = new AlertDialog.Builder(rootView.getContext());
@@ -113,8 +111,10 @@ public class HomeFragment extends Fragment implements Keys, View.OnClickListener
     @Override
     public void onClick(View v) {
         //if AsyncTask is running, do nothing.
-        if(!(locate.getStatus() == AsyncTask.Status.RUNNING))
-            locate.execute(zipCodeTxt.getText().toString());
+        if(lookup.getStatus() != AsyncTask.Status.RUNNING) {
+            lookup = new SearchBars();
+            lookup.execute(zipCodeTxt.getText().toString());
+        }
     }
 
     private class SearchBars extends AsyncTask<String, String[], Void> {
@@ -183,8 +183,11 @@ public class HomeFragment extends Fragment implements Keys, View.OnClickListener
 
     //Not fully working yet.
     public void refresh() {
+        //System.out.println(lookup.getStatus() == AsyncTask.Status.RUNNING);
         //if AsyncTask is running, do nothing.
-        if(locate.getStatus() == AsyncTask.Status.FINISHED)
-            locate.execute();
+        if(lookup != null) {
+            lookup = new SearchBars();
+            lookup.execute();
+        }
     }
 }

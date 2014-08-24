@@ -36,9 +36,12 @@ public class BarList extends BaseAdapter {
 
     public BarList(Context c, String[] titles, String[] addresses, String[] ratings) {
         this.c = c;
+        if (list != null)
+            list.clear();
         list = new ArrayList<SingleRow>();
 
         for(int i = 0; i < 10; i++) {
+            System.out.println(list.size());
             list.add(new SingleRow(titles[i], addresses[i], ratings[i]));
         }
     }

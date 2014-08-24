@@ -50,8 +50,10 @@ public class YelpAPI implements Keys {
    */
   public YelpAPI(String consumerKey, String consumerSecret, String token, String tokenSecret) {
     this.service =
-        new ServiceBuilder().provider(TwoStepOAuth.class).apiKey(consumerKey)
-            .apiSecret(consumerSecret).build();
+        new ServiceBuilder()
+                .provider(TwoStepOAuth.class)
+                .apiKey(consumerKey)
+                .apiSecret(consumerSecret).build();
     this.accessToken = new Token(token, tokenSecret);
   }
 
@@ -135,13 +137,9 @@ public class YelpAPI implements Keys {
       for (int i = 0; i < SEARCH_LIMIT; i++) {
 	      business[i] = (JSONObject) businesses.get(i);
 	      businessID[i] = business[i].get("id").toString();
-	      //System.out.println(String.format(
-	      //    "%s businesses found, querying business info for the top result \"%s\" ...",
-	      //    businesses.size(), businessID[i]));
 
    	      // Select the business and display business details
 	      businessResponseJSON[i] = yelpApi.searchByBusinessId(businessID[i]);
-	      //System.out.println(String.format("Result for business \"%s\" found:", businessID[i]));
           Log.d("YelpAPI" ,businessResponseJSON[i]);
       }
   }

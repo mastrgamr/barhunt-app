@@ -15,6 +15,9 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -61,6 +64,30 @@ public class HomeFragment extends Fragment implements Keys, View.OnClickListener
     }
 
     public HomeFragment() { }
+
+    //inflate homefragment menu to allow for refresh.
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.homefragement, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_refresh) {
+            if(lookup.getStatus() != AsyncTask.Status.RUNNING) {
+                lookup = new SearchBars();
+                lookup.execute();
+            }
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -178,16 +205,6 @@ public class HomeFragment extends Fragment implements Keys, View.OnClickListener
         protected void onPostExecute(Void aVoid) {
             barListView.setAdapter(new BarList(rootView.getContext(), barNames, barAddresses, barRatings));
             Toast.makeText(rootView.getContext(), "10 Bars found in the area.", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    //Not fully working yet.
-    public void refresh() {
-        //System.out.println(lookup.getStatus() == AsyncTask.Status.RUNNING);
-        //if AsyncTask is running, do nothing.
-        if(lookup != null) {
-            lookup = new SearchBars();
-            lookup.execute();
         }
     }
 }
